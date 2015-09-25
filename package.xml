@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <name>lvr_ros</name>
+  <version>1.0.0</version>
+  <description>converts point clouds into meshes using lvr</description>
+
+  <maintainer email="spuetz@uos.de">Sebastian Pütz</maintainer>
+
+  <license>BSD</license>
+  <author email="spuetz@uos.de">Sebastian Pütz</author>
+  <author email="hdeeken@uos.de">Henning Deeken</author>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>mesh_msgs</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>mesh_msgs</run_depend>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
