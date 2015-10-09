@@ -77,7 +77,7 @@ catkin_package(
   CATKIN_DEPENDS roscpp mesh_msgs 
   INCLUDE_DIRS include
   DEPENDS PCL OPENGL GLUT CGAL Boost LVR
-  LIBRARIES lvr_ros_converter
+  LIBRARIES lvr_ros_mesh_conversions
 ) 
 
 set(LINK_LIBS
