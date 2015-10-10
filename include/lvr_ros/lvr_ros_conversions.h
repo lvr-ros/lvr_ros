@@ -35,16 +35,16 @@
 #include <ros/ros.h>
 #include <ros/console.h>
 
-#include "io/Model.hpp"
-#include "io/PointBuffer.hpp"
-#include "io/MeshBuffer.hpp"
-#include "io/PLYIO.hpp"
-#include "io/DataStruct.hpp"
-#include "io/ModelFactory.hpp"
+#include <lvr/io/Model.hpp>
+#include <lvr/io/PointBuffer.hpp>
+#include <lvr/io/MeshBuffer.hpp>
+#include <lvr/io/PLYIO.hpp>
+#include <lvr/io/DataStruct.hpp>
+#include <lvr/io/ModelFactory.hpp>
 
-#include "texture/Texture.hpp"
-#include "geometry/Vertex.hpp"
-#include "geometry/HalfEdgeMesh.hpp"
+#include <lvr/texture/Texture.hpp>
+#include <lvr/geometry/Vertex.hpp>
+#include <lvr/geometry/HalfEdgeMesh.hpp>
 
 #include <std_msgs/String.h>
 #include <sensor_msgs/PointCloud2.h>

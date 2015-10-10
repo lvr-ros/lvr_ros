@@ -116,7 +116,7 @@ namespace lvr_ros
     lvr::Tesselator<lvr::Vertexf, lvr::Normalf>::init();
     for (unsigned int i = 0; i < polygon_mesh.polygons.size(); i++ )
     {
-      vector<vector<lvr::Vertexf>> vectorBorderPoints;
+      vector<vector<lvr::Vertexf> > vectorBorderPoints;
       vector<lvr::Vertexf > borderPoints;
       for (unsigned int j = 0; j < polygon_mesh.polygons[i].vertex_indices.size(); j++)
       {
