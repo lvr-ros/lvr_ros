@@ -28,6 +28,8 @@
  */
 
 #include "lvr_ros/lvr_ros_conversions.h"
+#include "lvr_ros/colors.h"
+#include <cmath>
 
 namespace lvr_ros
 {
@@ -106,6 +108,16 @@ namespace lvr_ros
       faces.push_back((unsigned int) mesh.triangles[i].vertex_indices[2]);
     }
     buffer.setFaceArray(faces);
+
+    // copy normals
+    vector<float> normals;
+    for(unsigned int i = 0; i < mesh.vertex_normals.size(); i++){
+      normals.push_back((float) mesh.vertex_normals[i].x);
+      normals.push_back((float) mesh.vertex_normals[i].y);
+      normals.push_back((float) mesh.vertex_normals[i].z);
+    }
+    buffer.setVertexNormalArray(normals);
+
     return true;
   }
 
@@ -254,6 +266,66 @@ namespace lvr_ros
     buffer.setFaceArray( new_indexBuffer );
   }
 
+  void intensityToTriangleRainbowColors(const std::vector<float>& intensity, mesh_msgs::TriangleMesh& mesh, float min, float max){
+    float range = max - min;
+    
+    float r, g, b;
+    float a = 1;
+    
+    for(size_t i=0; i<intensity.size(); i++){
+      float norm = (intensity[i] - min) / range;
+      getRainbowColor(norm, r, g, b);
+      std_msgs::ColorRGBA color;
+      color.a = a;
+      color.r = r;
+      color.g = g;
+      color.b = b;
+      mesh.triangle_colors.push_back(color);
+    }
+  }
+  
+  void intensityToTriangleRainbowColors(const std::vector<float>& intensity, mesh_msgs::TriangleMesh& mesh){
+    float min = std::numeric_limits<float>::max();
+    float max = std::numeric_limits<float>::min();
+  
+    for(size_t i=0; i<intensity.size(); i++){
+      if(!std::isfinite(intensity[i])) continue;
+      if(min > intensity[i]) min = intensity[i];
+      if(max < intensity[i]) max = intensity[i];
+    }
+    intensityToTriangleRainbowColors(intensity, mesh, min, max);
+  }
+  
+  void intensityToVertexRainbowColors(const std::vector<float>& intensity, mesh_msgs::TriangleMesh& mesh, float min, float max){
+    float range = max - min;
+    
+    float r, g, b;
+    float a = 1;
+    
+    for(size_t i=0; i<intensity.size(); i++){
+      float norm = (intensity[i] - min) / range;
+      getRainbowColor(norm, r, g, b);
+      std_msgs::ColorRGBA color;
+      color.a = a;
+      color.r = r;
+      color.g = g;
+      color.b = b;
+      mesh.vertex_colors.push_back(color);
+    } 
+  }
+
+  void intensityToVertexRainbowColors(const std::vector<float>& intensity, mesh_msgs::TriangleMesh& mesh){
+    float min = std::numeric_limits<float>::max();
+    float max = std::numeric_limits<float>::min();
+  
+    for(size_t i=0; i<intensity.size(); i++){
+      if(!std::isfinite(intensity[i])) continue;
+      if(min > intensity[i]) min = intensity[i];
+      if(max < intensity[i]) max = intensity[i];
+    }
+    intensityToVertexRainbowColors(intensity, mesh, min, max);
+  }
+  
   void removeDuplicates( mesh_msgs::TriangleMesh& mesh)
   {
     lvr::MeshBuffer buffer;

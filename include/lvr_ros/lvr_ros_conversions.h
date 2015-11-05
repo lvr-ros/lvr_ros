@@ -138,6 +138,42 @@ namespace lvr_ros
    * @param path   Path to a MeshFile
    */
   bool writeTriangleMesh( mesh_msgs::TriangleMesh mesh, string path );
+  
+  /**
+   * @brief Writes inensity values as rainbow colors for the triangle colors
+   * 
+   * @param intensity	Intensity values
+   * @param mesh		ROS-TriangleMeshGeometryMessage
+   */
+  void intensityToTriangleRainbowColors(const std::vector<float>& intensity, mesh_msgs::TriangleMesh& mesh);
+
+  /**
+   * @brief Writes inensity values as rainbow colors for the triangle colors
+   * 
+   * @param intensity	Intensity values
+   * @param mesh		ROS-TriangleMeshGeometryMessage
+   * @param min			The minimal value
+   * @param max			The maximal value
+   */
+  void intensityToTriangleRainbowColors(const std::vector<float>& intensity, mesh_msgs::TriangleMesh& mesh, float min, float max);
+
+  /**
+   * @brief Writes inensity values as rainbow colors for the vertex colors
+   * 
+   * @param intensity	Intensity values
+   * @param mesh		ROS-TriangleMeshGeometryMessage
+   * @param min			The minimal value
+   * @param max			The maximla value
+   */
+  void intensityToVertexRainbowColors(const std::vector<float>& intensity, mesh_msgs::TriangleMesh& mesh, float min, float max);
+   
+  /**
+   * @brief Writes inensity values as rainbow colors for the vertex colors
+   * 
+   * @param intensity	Intensity values
+   * @param mesh		ROS-TriangleMeshGeometryMessage
+   */
+  void intensityToVertexRainbowColors(const std::vector<float>& intensity, mesh_msgs::TriangleMesh& mesh);
 
 } // end namespace
 

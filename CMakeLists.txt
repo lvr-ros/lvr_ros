@@ -40,7 +40,9 @@ set(LINK_LIBS
 
 
 ### lvr_ros_converter
-add_library(lvr_ros_mesh_conversions src/lvr_ros_mesh_conversions.cpp)
+add_library(lvr_ros_mesh_conversions
+  src/lvr_ros_mesh_conversions.cpp
+  src/colors.cpp)
 target_link_libraries(lvr_ros_mesh_conversions ${LINK_LIBS})
 
 add_dependencies(lvr_ros_mesh_conversions ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
