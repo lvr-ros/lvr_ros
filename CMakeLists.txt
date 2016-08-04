@@ -19,6 +19,7 @@ include_directories(${OPENGL_INC})
 
 include_directories(
   include
+  ${catkin_INCLUDE_DIRS}
   ${lvr_INCLUDE_DIRS}
 )
 
