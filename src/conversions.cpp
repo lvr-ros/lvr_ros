@@ -339,4 +339,96 @@ namespace lvr_ros
     fromMeshBufferToTriangleMesh(buffer_ptr, mesh);
   }
 
+  static inline bool hasCloudChannel (const sensor_msgs::PointCloud2& cloud, const std::string& field_name)
+  {
+    // Get the index we need
+    for (size_t d = 0; d < cloud.fields.size (); ++d)
+      if (cloud.fields[d].name == field_name)
+        return true;
+    return false;
+  }
+
+  void convertPointCloud2ToModelPtr(const sensor_msgs::PointCloud2& cloud, lvr::ModelPtr& model)
+  {
+
+    const size_t size = cloud.height * cloud.width;
+
+    typedef sensor_msgs::PointCloud2ConstIterator<float> CloudIterFloat;
+    typedef sensor_msgs::PointCloud2ConstIterator<uint8_t> CloudIterUInt8;
+
+
+    // copy point data
+    CloudIterFloat iter_x(cloud, "x");
+    CloudIterFloat iter_y(cloud, "y");
+    CloudIterFloat iter_z(cloud, "z");
+    float* pointData = new float[size * 3];
+    for(int i=0; 
+        iter_x != iter_x.end();
+        ++iter_x, ++iter_y, ++iter_z,
+        i+=3) {
+
+      // copy point 
+      pointData[i]   = *iter_x;
+      pointData[i+1] = *iter_y;
+      pointData[i+2] = *iter_z;
+    }
+    model->m_pointCloud->setPointArray(lvr::floatArr(pointData), size);
+
+
+    // copy point normals if available
+    bool normalsAvailable = 
+        hasCloudChannel(cloud, "normal_x") 
+        && hasCloudChannel(cloud, "normal_y")
+        && hasCloudChannel(cloud, "normal_z");
+
+    if(normalsAvailable){
+      CloudIterFloat iter_n_x(cloud, "normal_x");
+      CloudIterFloat iter_n_y(cloud, "normal_y");
+      CloudIterFloat iter_n_z(cloud, "normal_z");
+      float* normalsData = new float[size * 3];
+      for(int i=0; 
+          iter_n_x != iter_n_x.end();
+          ++iter_n_x, ++iter_n_y, ++iter_n_z,
+          i+=3) {
+
+        // copy normal 
+        normalsData[i]   = *iter_n_x;
+        normalsData[i+1] = *iter_n_y;
+        normalsData[i+2] = *iter_n_z;
+      }
+      model->m_pointCloud->setPointNormalArray(lvr::floatArr(normalsData), size);
+    }
+
+
+    // copy color data if available    
+    if(hasCloudChannel(cloud, "rgb") != -1){
+      CloudIterUInt8 iter_rgb(cloud, "rgb");
+      uint8_t* colorData = new uint8_t[size*3];
+      for(int i=0; iter_rgb != iter_rgb.end();
+          ++iter_rgb, i+=3) {
+
+        // copy color rgb
+        colorData[i]   = iter_rgb[0];
+        colorData[i+1] = iter_rgb[1];
+        colorData[i+2] = iter_rgb[2];
+      }
+      model->m_pointCloud->setPointColorArray(lvr::ucharArr(colorData), size);
+    }
+
+
+    // copy intensity if available
+    if(hasCloudChannel(cloud, "intensities")){
+      CloudIterFloat iter_int(cloud, "intensities");
+      float* intensityData = new float[size];
+
+      for(int i=0; iter_int != iter_int.end();
+          ++iter_int, i++) {
+
+        // copy color rgb
+        intensityData[i]   = *iter_int;
+      }
+      model->m_pointCloud->setPointIntensityArray(lvr::floatArr(intensityData), size);
+    }
+  }
+
 } // end namespace

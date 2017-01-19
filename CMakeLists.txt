@@ -34,16 +34,26 @@ catkin_package(
   LIBRARIES lvr_ros_conversions
 ) 
 
-set(LINK_LIBS
+add_library(lvr_ros_conversions
+  src/conversions.cpp
+  src/colors.cpp)
+target_link_libraries(lvr_ros_conversions
   ${catkin_LIBRARIES}
   ${lvr_LIBRARIES}
 )
 
-add_library(lvr_ros_conversions
+add_executable(lvr_ros_reconstruction
+  src/reconstruction.cpp
   src/conversions.cpp
   src/colors.cpp)
-target_link_libraries(lvr_ros_conversions ${LINK_LIBS})
 
+target_link_libraries(lvr_ros_reconstruction
+  ${catkin_LIBRARIES}
+  ${lvr_LIBRARIES}
+)
+
+add_dependencies(lvr_ros_reconstruction ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(lvr_ros_reconstruction ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
 add_dependencies(lvr_ros_conversions ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(lvr_ros_conversions ${catkin_EXPORT_TARGETS} ${PROJECT_NAME}_gencfg)
 
@@ -51,7 +61,7 @@ install(
   DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 install(
-  TARGETS lvr_ros_conversions
+  TARGETS lvr_ros_conversions lvr_ros_reconstruction
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

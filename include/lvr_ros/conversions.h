@@ -58,6 +58,9 @@
 #include <mesh_msgs/TriangleMesh.h>
 #include <mesh_msgs/TriangleMeshStamped.h>
 
+#include <sensor_msgs/point_cloud2_iterator.h>
+
+
 namespace lvr_ros
 {
 
@@ -174,6 +177,8 @@ namespace lvr_ros
    * @param mesh		ROS-TriangleMeshGeometryMessage
    */
   void intensityToVertexRainbowColors(const std::vector<float>& intensity, mesh_msgs::TriangleMesh& mesh);
+
+  void convertPointCloud2ToModelPtr(const sensor_msgs::PointCloud2& cloud, lvr::ModelPtr& model);
 
 } // end namespace
 
