@@ -11,9 +11,11 @@
   <author email="hdeeken@uos.de">Henning Deeken</author>
 
   <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
   <build_depend>mesh_msgs</build_depend>
 
   <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
   <run_depend>mesh_msgs</run_depend>
   
   <buildtool_depend>catkin</buildtool_depend>

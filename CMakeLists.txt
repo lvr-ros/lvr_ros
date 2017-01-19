@@ -11,7 +11,7 @@ find_package(lvr REQUIRED)
 
 add_definitions(${lvr_DEFINITIONS})
 
-FIND_PATH(OPENGL_INC gl.h /usr/include/GL)
+find_path(OPENGL_INC gl.h /usr/include/GL)
 include_directories(${OPENGL_INC})
 
 #find_package(PCL 1.0 REQUIRED)
@@ -28,7 +28,7 @@ link_directories(
 )
 
 catkin_package(
-  CATKIN_DEPENDS roscpp mesh_msgs 
+  CATKIN_DEPENDS roscpp sensor_msgs mesh_msgs 
   INCLUDE_DIRS include
   DEPENDS lvr
   LIBRARIES lvr_ros_conversions
