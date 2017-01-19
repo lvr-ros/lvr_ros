@@ -31,7 +31,7 @@ catkin_package(
   CATKIN_DEPENDS roscpp mesh_msgs 
   INCLUDE_DIRS include
   DEPENDS lvr
-  LIBRARIES lvr_ros_mesh_conversions
+  LIBRARIES lvr_ros_conversions
 ) 
 
 set(LINK_LIBS
@@ -39,21 +39,19 @@ set(LINK_LIBS
   ${lvr_LIBRARIES}
 )
 
-
-### lvr_ros_converter
-add_library(lvr_ros_mesh_conversions
-  src/lvr_ros_mesh_conversions.cpp
+add_library(lvr_ros_conversions
+  src/conversions.cpp
   src/colors.cpp)
-target_link_libraries(lvr_ros_mesh_conversions ${LINK_LIBS})
+target_link_libraries(lvr_ros_conversions ${LINK_LIBS})
 
-add_dependencies(lvr_ros_mesh_conversions ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
-add_dependencies(lvr_ros_mesh_conversions ${catkin_EXPORT_TARGETS} ${PROJECT_NAME}_gencfg)
+add_dependencies(lvr_ros_conversions ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(lvr_ros_conversions ${catkin_EXPORT_TARGETS} ${PROJECT_NAME}_gencfg)
 
 install(
   DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 install(
-  TARGETS lvr_ros_mesh_conversions
+  TARGETS lvr_ros_conversions
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

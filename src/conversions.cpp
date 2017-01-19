@@ -20,14 +20,14 @@
  *
  * lvr_ros_conversions.cpp
  *
- * Author: Henning Deeken <hdeeken@uos.de>,
- *         Sebastian Pütz <spuetz@uos.de>,
+ * Author: Sebastian Pütz <spuetz@uos.de>,
+ *         Henning Deeken <hdeeken@uos.de>,
  *         Marcel Mrozinski <mmrozins@uos.de>,
  *         Tristan Igelbrink <tigelbri@uos.de>
  *
  */
 
-#include "lvr_ros/lvr_ros_conversions.h"
+#include "lvr_ros/conversions.h"
 #include "lvr_ros/colors.h"
 #include <cmath>
 
@@ -36,9 +36,9 @@ namespace lvr_ros
 
   bool fromMeshBufferToTriangleMesh(lvr::MeshBufferPtr buffer, mesh_msgs::TriangleMesh& mesh)
   {
-    size_t numVertices;
-    size_t numFaces;
-    size_t numNormals;
+    size_t numVertices = 0;
+    size_t numFaces = 0;
+    size_t numNormals = 0;
     lvr::coord3fArr verticesArray = buffer->getIndexedVertexArray(numVertices);
     lvr::coord3fArr normalsArray = buffer->getIndexedVertexNormalArray(numNormals);
     lvr::uintArr facesArray = buffer->getFaceArray(numFaces);
@@ -49,6 +49,7 @@ namespace lvr_ros
 
     if (numVertices && numFaces)
     {
+      // copy vertices
       for (unsigned int i = 0; i < numVertices; i++)
       {
         mesh.vertices[i].x = verticesArray[i].x;
@@ -56,6 +57,7 @@ namespace lvr_ros
         mesh.vertices[i].z = verticesArray[i].z;
       }
 
+      // copy triangles
       for (unsigned int i = 0; i < numFaces; i++)
       {
         mesh.triangles[i].vertex_indices[0] = facesArray[i * 3];
@@ -63,8 +65,14 @@ namespace lvr_ros
         mesh.triangles[i].vertex_indices[2] = facesArray[i * 3 + 2];
       }
 
-      /* 
+      // copy point normals
+      for (unsigned int i = 0; i < numNormals; i++){
+        mesh.vertex_normals[i].x = normalsArray[i].x;
+        mesh.vertex_normals[i].y = normalsArray[i].y;
+        mesh.vertex_normals[i].z = normalsArray[i].z;
+      }
 
+      /* 
             optional:
             geometry_msgs/Point[] vertex_normals
             std_msgs/ColorRGBA[] vertex_colors
@@ -72,13 +80,8 @@ namespace lvr_ros
             mesh_msgs/Material[] face_materials
             sensor_msgs/Image[] textures
             mesh_msgs/Cluster[] clusters
+      */
 
-       */
-      for (unsigned int i = 0; i < numNormals; i++){
-        mesh.vertex_normals[i].x = normalsArray[i].x;
-        mesh.vertex_normals[i].y = normalsArray[i].y;
-        mesh.vertex_normals[i].z = normalsArray[i].z;
-      }
       return true;
     }
     else
@@ -336,185 +339,4 @@ namespace lvr_ros
     fromMeshBufferToTriangleMesh(buffer_ptr, mesh);
   }
 
-  /*
-     bool convertMeshBufferToTextureMessage(lvr::MeshBufferPtr buffer, lvr_ros::Textures& message)
-     {
-     GroupVector textureMaterials;
-     GroupVector colorMaterials;
-     generateMaterialGroupsFromMeshBuffer(buffer, textureMaterials, colorMaterials);
-
-     size_t numVertices;
-     size_t numVertexTextureCoordinates;
-     size_t numTextures;
-
-     lvr::coord3fArr vertices = buffer->getIndexedVertexArray(numVertices);
-     lvr::coord3fArr vertexTextureCoordinates = 
-     buffer->getIndexedVertexTextureCoordinateArray(numVertexTextureCoordinates);
-
-     lvr::textureArr textures = buffer->getTextureArray(numTextures);
-
-     lvr_ros::Textures texturesMsg;
-     texturesMsg.header.stamp = stamp;
-     texturesMsg.header.frame_id = frame;
-     texturesMsg.texturecoords.resize(numVertices);
-     texturesMsg.materialgroups.resize(textureMaterials.size() + colorMaterials.size());
-
-     for (int i = 0; i < numVertices; i++)
-     {
-  // texture stuff
-  texturesMsg.texturecoords[i].x = vertexTextureCoordinates[i][0];
-  texturesMsg.texturecoords[i].y = 1 - vertexTextureCoordinates[i][1];
-  texturesMsg.texturecoords[i].z = vertexTextureCoordinates[i][2];
-  }
-
-  // fill materialgroups message type with material groups WITH texture
-  for (int i = 0; i < textureMaterials.size(); i++)
-  {
-  MaterialGroupPtr g = textureMaterials[i];
-
-  int width  = textures[g->texture_index]->m_width;
-  int height = textures[g->texture_index]->m_height;
-
-  // fill image in materialgroup message
-  texturesMsg.materialgroups[i].image.width  = width;
-  texturesMsg.materialgroups[i].image.height = height;
-  texturesMsg.materialgroups[i].image.data.resize(width * height * 3);
-
-  for (int j = 0; j < width * height * 3; j++)
-  {
-  texturesMsg.materialgroups[i].image.data[j] = 
-  (unsigned int8_t) textures[g->texture_index]->m_pixels[j];
-  }
-
-  // fill default color in message
-  texturesMsg.materialgroups[i].defaultcolor.r = g->r;
-  texturesMsg.materialgroups[i].defaultcolor.g = g->g;
-  texturesMsg.materialgroups[i].defaultcolor.b = g->b;
-
-  //TODO: put in intensity values
-  texturesMsg.materialgroups[i].defaultcolor.a = 1;
-  texturesMsg.materialgroups[i].face_indices.resize(g->faceBuffer.size());
-
-  // fill associated faces of texture in message
-  for (int k = 0; k < g->faceBuffer.size(); k++)
-  {
-  texturesMsg.materialgroups[i].face_indices[k] = g->faceBuffer[k];
-  }
-  g->faceBuffer.clear();
-  }
-
-  // fill materialgroups WITHOUT texture in message
-  for (int i = 0; i < colorMaterials.size(); i++)
-  {
-  MaterialGroupPtr g = colorMaterials[i];
-  int index = i + textureMaterials.size();
-  // fill default color in message
-  texturesMsg.materialgroups[index].defaultcolor.r = g->r;
-  texturesMsg.materialgroups[index].defaultcolor.g = g->g;
-  texturesMsg.materialgroups[index].defaultcolor.b = g->b;
-  texturesMsg.materialgroups[index].image.width  = 0;
-  texturesMsg.materialgroups[index].image.height = 0;
-  //TODO: put in intensity values
-  texturesMsg.materialgroups[index].defaultcolor.a = 1;
-  texturesMsg.materialgroups[index].face_indices.resize(g->faceBuffer.size());
-
-  // fill associated faces of texture in message
-  for (int k = 0; k < g->faceBuffer.size(); k++)
-  {
-    texturesMsg.materialgroups[index].face_indices[k] = g->faceBuffer[k];
-  }
-  g->faceBuffer.clear();
-}
-textureMaterials.clear();
-colorMaterials.clear();
-return texturesMsg;
-}
-
-void generateMaterialGroupsFromMeshBuffer(lvr::MeshBufferPtr buffer,
-    GroupVector &textureMaterials,
-    GroupVector &colorMaterials)
-{
-  int countera = 0;
-  size_t numMaterials;
-  size_t numFaceMaterialIndices;
-  size_t numFaces;
-
-  lvr::materialArr faceMaterials = buffer->getMaterialArray(numMaterials);
-  lvr::uintArr faceMaterialIndices = buffer->getFaceMaterialIndexArray(numFaceMaterialIndices);
-  lvr::uintArr facesArray = buffer->getFaceArray(numFaces);
-
-  std::map<int, MaterialGroupPtr > texMatMap;
-  std::map<lvr::Vertex<unsigned char>, MaterialGroupPtr > colorMatMap;
-
-  // Iterate over face material buffer and
-  // sort faces by their material
-  for (unsigned int i = 0; i < numMaterials; i++)
-  {
-    std::map<int, MaterialGroupPtr>::iterator texIt;
-    std::map<lvr::Vertex<unsigned char>, MaterialGroupPtr >::iterator colIt;
-
-    // Get material by index and lookup in map. If present
-    // add face index to the corresponding group. Create a new
-    // group if none was found. For efficient rendering we have to
-    // create groups by color and texture index,
-    lvr::Material* m = faceMaterials[i];
-
-    if (m->texture_index != -1)
-    {
-
-      texIt = texMatMap.find(m->texture_index);
-      if (texIt == texMatMap.end())
-      {
-        MaterialGroupPtr g = MaterialGroupPtr(new MaterialGroup());
-        g->texture_index = m->texture_index;
-        g->r = 1;
-        g->g = 1;
-        g->b = 1;
-        textureMaterials.push_back(g);
-        texMatMap[m->texture_index] = g;
-        countera++;
-      }
-    }
-
-    else
-    {
-      lvr::Vertex<unsigned char> coloru = lvr::Vertex<unsigned char>(m->r, m->g, m->b);
-      colIt = colorMatMap.find(coloru);
-
-      if (colIt == colorMatMap.end())
-      {
-        MaterialGroupPtr g = MaterialGroupPtr(new MaterialGroup());
-        g->texture_index = m->texture_index;
-        g->r = m->r;
-        g->g = m->g;
-        g->b = m->b;
-        colorMaterials.push_back(g);
-        colorMatMap[coloru] = g;
-        countera++;
-      }
-    }
-  }
-
-  // fill MaterialGroups with associated faces
-  for (unsigned int i = 0; i < numFaces; i++)
-  {
-    std::map<int, MaterialGroupPtr>::iterator texIt;
-    std::map<lvr::Vertex<unsigned char>, MaterialGroupPtr >::iterator colIt;
-
-    lvr::Material* m = faceMaterials[faceMaterialIndices[i]];
-
-    if (m->texture_index != -1)
-    {
-      texIt = texMatMap.find(m->texture_index);
-      texIt->second->faceBuffer.push_back(i);
-    }
-
-    else
-    {
-      colIt = colorMatMap.find(lvr::Vertex<unsigned char>(m->r, m->g, m->b));
-      colIt->second->faceBuffer.push_back(i);
-    }
-  }
-}
-*/
 } // end namespace
