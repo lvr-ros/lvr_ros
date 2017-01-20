@@ -24,8 +24,7 @@
 
 #include "lvr_ros/reconstruction.h"
 #include "lvr_ros/conversions.h"
-#include <lvr/io/Model.hpp>
-
+#include <dynamic_reconfigure/server.h>
 
 namespace lvr_ros{
 
@@ -38,8 +37,22 @@ namespace lvr_ros{
 	Reconstruction::~Reconstruction(){}
 
 	void Reconstruction::pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud){
-		lvr::ModelPtr model_ptr(new lvr::Model());
-		lvr_ros::convertPointCloud2ToModelPtr(*cloud, model_ptr);
+		mesh_msgs::TriangleMeshStamped mesh;
+		createMesh(*cloud, mesh);
+	}
+
+	void Reconstruction::createMesh(const sensor_msgs::PointCloud2& cloud, mesh_msgs::TriangleMeshStamped& mesh_msg){
+		lvr::PointBufferPtr point_buffer_ptr(new lvr::PointBuffer);
+		lvr::MeshBufferPtr mesh_buffer_ptr(new lvr::MeshBuffer);
+
+		lvr_ros::fromPointCloud2ToPointBuffer(cloud, *point_buffer_ptr);
+		createMesh(point_buffer_ptr, mesh_buffer_ptr);
+		lvr_ros::fromMeshBufferToTriangleMesh(mesh_buffer_ptr, mesh_msg.mesh);
+	}
+
+	void Reconstruction::createMesh(lvr::PointBufferPtr& point_buffer, lvr::MeshBufferPtr& mesh_buffer){
+
+
 	}
 
 

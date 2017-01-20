@@ -83,7 +83,12 @@ namespace lvr_ros
    * @return bool success status
    */
   bool fromMeshBufferToTriangleMesh(
-      lvr::MeshBufferPtr buffer,
+      const lvr::MeshBufferPtr& buffer,
+      mesh_msgs::TriangleMesh& message
+      );
+
+  bool fromMeshBufferToTriangleMesh(
+      lvr::MeshBuffer& buffer,
       mesh_msgs::TriangleMesh& message
       );
 
@@ -94,12 +99,12 @@ namespace lvr_ros
    * @return bool success status
    */
   bool fromTriangleMeshToMeshBuffer(
-      mesh_msgs::TriangleMesh mesh,
+      const mesh_msgs::TriangleMesh& mesh,
       lvr::MeshBuffer& buffer
       );
 
   bool fromPolygonMeshToTriangleMesh(
-      mesh_msgs::PolygonMesh polygon_mesh,
+      const mesh_msgs::PolygonMesh& polygon_mesh,
       mesh_msgs::TriangleMesh& triangle_mesh
       );
 
@@ -122,7 +127,7 @@ namespace lvr_ros
    * @param mesh   LVR-MeshBufferPointer
    * @param path   Path to a MeshFile
    */
-  bool writeMeshBuffer(lvr::MeshBufferPtr mesh, string path);
+  bool writeMeshBuffer(lvr::MeshBufferPtr& mesh, string path);
 
   /**
    * @brief Reads a file and returns a lvr_ros/TriangleMesh
@@ -140,7 +145,7 @@ namespace lvr_ros
    * @param mesh   ROS-TriangleMeshGeometryMessage
    * @param path   Path to a MeshFile
    */
-  bool writeTriangleMesh( mesh_msgs::TriangleMesh mesh, string path );
+  bool writeTriangleMesh( mesh_msgs::TriangleMesh& mesh, string path );
   
   /**
    * @brief Writes inensity values as rainbow colors for the triangle colors
@@ -178,7 +183,7 @@ namespace lvr_ros
    */
   void intensityToVertexRainbowColors(const std::vector<float>& intensity, mesh_msgs::TriangleMesh& mesh);
 
-  void convertPointCloud2ToModelPtr(const sensor_msgs::PointCloud2& cloud, lvr::ModelPtr& model);
+  void fromPointCloud2ToPointBuffer(const sensor_msgs::PointCloud2& cloud, lvr::PointBuffer& buffer);
 
 } // end namespace
 

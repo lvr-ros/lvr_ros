@@ -34,14 +34,19 @@
 namespace lvr_ros
 {
 
-  bool fromMeshBufferToTriangleMesh(lvr::MeshBufferPtr buffer, mesh_msgs::TriangleMesh& mesh)
+  bool fromMeshBufferToTriangleMesh(const lvr::MeshBufferPtr& buffer, mesh_msgs::TriangleMesh& mesh)
+  {
+    fromMeshBufferToTriangleMesh(*buffer, mesh);
+  }
+
+  bool fromMeshBufferToTriangleMesh(lvr::MeshBuffer& buffer, mesh_msgs::TriangleMesh& mesh)
   {
     size_t numVertices = 0;
     size_t numFaces = 0;
     size_t numNormals = 0;
-    lvr::coord3fArr verticesArray = buffer->getIndexedVertexArray(numVertices);
-    lvr::coord3fArr normalsArray = buffer->getIndexedVertexNormalArray(numNormals);
-    lvr::uintArr facesArray = buffer->getFaceArray(numFaces);
+    lvr::coord3fArr verticesArray = buffer.getIndexedVertexArray(numVertices);
+    lvr::coord3fArr normalsArray = buffer.getIndexedVertexNormalArray(numNormals);
+    lvr::uintArr facesArray = buffer.getFaceArray(numFaces);
 
     mesh.vertices.resize(numVertices);
     mesh.vertex_normals.resize(numNormals);
@@ -90,7 +95,7 @@ namespace lvr_ros
     }
   }
 
-  bool fromTriangleMeshToMeshBuffer(mesh_msgs::TriangleMesh mesh, lvr::MeshBuffer& buffer)
+  bool fromTriangleMeshToMeshBuffer(const mesh_msgs::TriangleMesh& mesh, lvr::MeshBuffer& buffer)
   {
     // copy vertices
     vector<float> vertices;
@@ -125,7 +130,7 @@ namespace lvr_ros
   }
 
   bool fromPolygonMeshToTriangleMesh(
-      mesh_msgs::PolygonMesh polygon_mesh,
+      mesh_msgs::PolygonMesh& polygon_mesh,
       mesh_msgs::TriangleMesh& triangle_mesh
       ){
     lvr::Tesselator<lvr::Vertexf, lvr::Normalf>::init();
@@ -189,7 +194,7 @@ namespace lvr_ros
     }
   }
 
-  bool writeMeshBuffer( lvr::MeshBufferPtr buffer, string path )
+  bool writeMeshBuffer( lvr::MeshBufferPtr& buffer, string path )
   {
     lvr::ModelPtr model( new lvr::Model(buffer) );
     lvr::ModelFactory::saveModel( model, path );
@@ -208,7 +213,7 @@ namespace lvr_ros
     return fromMeshBufferToTriangleMesh( model->m_mesh, mesh);
   }
 
-  bool writeTriangleMesh( mesh_msgs::TriangleMesh mesh, string path )
+  bool writeTriangleMesh( mesh_msgs::TriangleMesh& mesh, string path )
   {
     lvr::MeshBuffer buffer;
     if( fromTriangleMeshToMeshBuffer( mesh, buffer ))
@@ -348,7 +353,7 @@ namespace lvr_ros
     return false;
   }
 
-  void convertPointCloud2ToModelPtr(const sensor_msgs::PointCloud2& cloud, lvr::ModelPtr& model)
+  void fromPointCloud2ToPointBuffer(const sensor_msgs::PointCloud2& cloud, lvr::PointBuffer& buffer)
   {
 
     const size_t size = cloud.height * cloud.width;
@@ -372,7 +377,7 @@ namespace lvr_ros
       pointData[i+1] = *iter_y;
       pointData[i+2] = *iter_z;
     }
-    model->m_pointCloud->setPointArray(lvr::floatArr(pointData), size);
+    buffer.setPointArray(lvr::floatArr(pointData), size);
 
 
     // copy point normals if available
@@ -396,7 +401,7 @@ namespace lvr_ros
         normalsData[i+1] = *iter_n_y;
         normalsData[i+2] = *iter_n_z;
       }
-      model->m_pointCloud->setPointNormalArray(lvr::floatArr(normalsData), size);
+      buffer.setPointNormalArray(lvr::floatArr(normalsData), size);
     }
 
 
@@ -412,7 +417,7 @@ namespace lvr_ros
         colorData[i+1] = iter_rgb[1];
         colorData[i+2] = iter_rgb[2];
       }
-      model->m_pointCloud->setPointColorArray(lvr::ucharArr(colorData), size);
+      buffer.setPointColorArray(lvr::ucharArr(colorData), size);
     }
 
 
@@ -427,7 +432,7 @@ namespace lvr_ros
         // copy color rgb
         intensityData[i]   = *iter_int;
       }
-      model->m_pointCloud->setPointIntensityArray(lvr::floatArr(intensityData), size);
+      buffer.setPointIntensityArray(lvr::floatArr(intensityData), size);
     }
   }
 

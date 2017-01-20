@@ -28,9 +28,15 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <ros/ros.h>
 #include <ros/console.h>
+#include <dynamic_reconfigure/server.h>
+#include "lvr_ros/ReconstructionConfig.h"
+
 
 #include <mesh_msgs/TriangleMesh.h>
 #include <mesh_msgs/TriangleMeshStamped.h>
+
+#include <lvr/io/PointBuffer.hpp>
+#include <lvr/io/MeshBuffer.hpp>
 
 namespace lvr_ros{
 
@@ -43,6 +49,8 @@ class Reconstruction{
   private:
 
   	void pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud);
+	void createMesh(const sensor_msgs::PointCloud2& cloud, mesh_msgs::TriangleMeshStamped& mesh);
+	void createMesh(lvr::PointBufferPtr& point_buffer, lvr::MeshBufferPtr& mesh_buffer);
 
   	ros::NodeHandle node_handle;
   	ros::Publisher mesh_publisher;

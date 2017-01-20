@@ -5,6 +5,7 @@ project(lvr_ros)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   mesh_msgs
+  dynamic_reconfigure
 )
 
 find_package(lvr REQUIRED)
@@ -27,16 +28,21 @@ link_directories(
   ${catkin_LIBRARY_DIRS}
 )
 
+generate_dynamic_reconfigure_options(
+  cfg/Reconstruction.cfg
+)
+
 catkin_package(
   CATKIN_DEPENDS roscpp sensor_msgs mesh_msgs 
   INCLUDE_DIRS include
   DEPENDS lvr
   LIBRARIES lvr_ros_conversions
-) 
+)
 
 add_library(lvr_ros_conversions
   src/conversions.cpp
   src/colors.cpp)
+
 target_link_libraries(lvr_ros_conversions
   ${catkin_LIBRARIES}
   ${lvr_LIBRARIES}
