@@ -18,6 +18,15 @@ include_directories(${OPENGL_INC})
 #find_package(PCL 1.0 REQUIRED)
 #include_directories(SYSTEM ${PCL_INCLUDE_DIRS})
 
+### compile with c++11
+if (CMAKE_VERSION VERSION_LESS "3.1")
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set (CMAKE_CXX_FLAGS "--std=gnu++11 ${CMAKE_CXX_FLAGS}")
+  endif ()
+else ()
+  set (CMAKE_CXX_STANDARD 11)
+endif ()
+
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}

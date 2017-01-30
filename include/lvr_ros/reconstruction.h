@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * reconstruction.cpp
+ * reconstruction.h
  *
  * Author: Sebastian Pütz <spuetz@uos.de>,
  *
@@ -49,12 +49,14 @@ class Reconstruction{
   private:
 
   	void pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud);
-	void createMesh(const sensor_msgs::PointCloud2& cloud, mesh_msgs::TriangleMeshStamped& mesh);
-	void createMesh(lvr::PointBufferPtr& point_buffer, lvr::MeshBufferPtr& mesh_buffer);
+	bool createMesh(const sensor_msgs::PointCloud2& cloud, mesh_msgs::TriangleMeshStamped& mesh);
+	bool createMesh(lvr::PointBufferPtr& point_buffer, lvr::MeshBufferPtr& mesh_buffer);
+	float* getStatsCoeffs(std::string filename)const;
 
   	ros::NodeHandle node_handle;
   	ros::Publisher mesh_publisher;
   	ros::Subscriber cloud_subscriber;
+  	ReconstructionConfig config;
 
 };
 

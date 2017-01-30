@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * lvr_ros_conversions.h
+ * conversions.h
  *
  * created on: 30.04.2014
  *
@@ -183,7 +183,7 @@ namespace lvr_ros
    */
   void intensityToVertexRainbowColors(const std::vector<float>& intensity, mesh_msgs::TriangleMesh& mesh);
 
-  void fromPointCloud2ToPointBuffer(const sensor_msgs::PointCloud2& cloud, lvr::PointBuffer& buffer);
+  bool fromPointCloud2ToPointBuffer(const sensor_msgs::PointCloud2& cloud, lvr::PointBuffer& buffer);
 
 } // end namespace
 

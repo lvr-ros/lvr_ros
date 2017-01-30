@@ -18,7 +18,7 @@
  *
  * created on: 30.04.2014
  *
- * lvr_ros_conversions.cpp
+ * conversions.cpp
  *
  * Author: Sebastian Pütz <spuetz@uos.de>,
  *         Henning Deeken <hdeeken@uos.de>,
@@ -353,7 +353,7 @@ namespace lvr_ros
     return false;
   }
 
-  void fromPointCloud2ToPointBuffer(const sensor_msgs::PointCloud2& cloud, lvr::PointBuffer& buffer)
+  bool fromPointCloud2ToPointBuffer(const sensor_msgs::PointCloud2& cloud, lvr::PointBuffer& buffer)
   {
 
     const size_t size = cloud.height * cloud.width;
@@ -434,6 +434,6 @@ namespace lvr_ros
       }
       buffer.setPointIntensityArray(lvr::floatArr(intensityData), size);
     }
+    return true;
   }
-
 } // end namespace
