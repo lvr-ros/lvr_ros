@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="lvr_ros" type="lvr_ros_reconstruction" name="reconstruction" output="screen">
+    <remap from="pointcloud" to="assembled_cloud"/>
+    <remap from="mesh" to="assembled_mesh"/>
+    <rosparam>
+        voxelsize : 0.1                         # Voxelsize of grid used for reconstruction.
+        noExtrusion : False                     # Do not extend grid. Can be used  to avoid artefacts in dense data sets but. Disabling will possibly create additional holes in sparse data sets.
+        intersections : -1                      # Number of intersections used for reconstruction. If other than -1, voxelsize will calculated automatically.
+        pcm : 'FLANN'                           # Point cloud manager used for point handling and normal estimation. Choose from (STANN, PCL, NABO).
+        ransac : False                          # Set this flag for RANSAC based normal estimation.
+        decomposition : 'PMC'                   # Defines the type of decomposition that is used for the voxels :
+                                                    # Standard Marching Cubes (MC), Planar Marching Cubes (PMC),
+                                                    # Standard Marching Cubes with sharp feature detection (SF) or Tetraeder (MT) decomposition).
+        optimizePlanes : True                   # Shift all triangle vertices of a cluster onto their shared plane
+        clusterPlanes : False                   # Cluster planar regions based on normal threshold, do not shift vertices into regression plane.
+        cleanContours : 0                       # Remove noise artifacts from contours. Same values are between 2 and 4.
+        planeIterations : 3                     # Number of iterations for plane optimization
+        fillHoles : 30                          # Maximum size for hole filling
+        danglingArtifacts : 0                   # Remove dangling artifacts, i.e. remove the n smallest not connected surfaces
+        normalThreshold : 0.85                  # (Plane Normal Threshold) Normal threshold for plane optimization. Default 0.85 equals about 3 degrees.
+        smallRegionThreshold : 10               # Threshold for small region removal. If 0 nothing will be deleted.
+        kd : 50                                 # Number of normals used for distance function evaluation
+        ki : 50                                 # Number of normals used in the normal interpolation process
+        kn : 50                                 # Size of k-neighborhood used for normal estimation
+        minPlaneSize : 7                        # Minimum value for plane optimzation
+        retesselate : True                      # Retesselate regions that are in a regression plane. Implies --optimizePlanes.
+        lineFusionThreshold : 0.01              # Line Fusion Threshold for fusing line segments while tesselating.
+        generateTextures : False                # Generate textures during finalization.
+        textureAnalysis : False                 # Enable texture analysis features fo texture matching.
+        writeClassificationResult : False       # Write classification results to file 'clusters.clu'
+        texelSize : 0.001                       # Texel size that determines texture resolution.
+        classifier : 'PlaneSimpsons'            # Classfier object used to color the mesh.
+        depth : 100                             # Maximum recursion depth for region growing.
+        recalcNormals : False                   # Always estimate normals, even if normals are already given.
+        threads : 2                             # Number of threads
+        sharpFeatThreshold : 0.9                # Sharp feature threshold when using sharp feature decomposition
+        sharpCornThreshold : 0.7                # Sharp corner threshold when using sharp feature decomposition
+        ecm : 'QUADRIC'                         # Edge collapse method for mesh reduction. Choose from QUADRIC, QUADRIC_TRI, MELAX, SHORTEST
+        numEdgeCollapses : 0                    # Edge collapse count. Number of edges to collapse for mesh reduction.
+        texturePack : ''                        # Path to texture pack
+        numStatsColors : 16                     # Number of colors for texture statistics
+        numCCVColors : 64                       # Number of colors for texture matching based on color information
+        coherenceThreshold : 50                 # Coherence threshold for texture matching based on color information
+        useCrossCorr : False                    # Use texture matching based on cross correlation.
+        patternThreshold : 100                  # Threshold for pattern extraction from textures
+        minTransformVotes : 3                   # Minimum number of votes to consider a texture transformation as correct
+    </rosparam>
+  </node>
+</launch>
