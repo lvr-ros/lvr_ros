@@ -58,9 +58,15 @@ namespace lvr_ros{
 	typedef lvr::PCLKSurface< cVertex, cNormal > pclSurface;
 
 	Reconstruction::Reconstruction(){
+	    ros::NodeHandle nh("~");
 
 		cloud_subscriber = node_handle.subscribe("/pointcloud", 1, &Reconstruction::pointCloudCallback, this);
 		mesh_publisher = node_handle.advertise<mesh_msgs::TriangleMeshStamped>("/mesh", 1);
+
+		// setup dynamic reconfigure
+		reconfigure_server_ptr = DynReconfigureServerPtr(new DynReconfigureServer(nh));
+    	callback_type = boost::bind(&Reconstruction::reconfigureCallback, this, _1, _2);
+    	reconfigure_server_ptr->setCallback(callback_type);
 	}
 
 	Reconstruction::~Reconstruction(){}
@@ -68,6 +74,11 @@ namespace lvr_ros{
 	void Reconstruction::pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud){
 		mesh_msgs::TriangleMeshStamped mesh;
 		createMesh(*cloud, mesh);
+		mesh_publisher.publish(mesh);
+	}
+
+	void Reconstruction::reconfigureCallback(lvr_ros::ReconstructionConfig& config, uint32_t level){
+		this->config = config;
 	}
 
 	bool Reconstruction::createMesh(const sensor_msgs::PointCloud2& cloud, mesh_msgs::TriangleMeshStamped& mesh_msg){
@@ -86,6 +97,11 @@ namespace lvr_ros{
 			ROS_ERROR_STREAM("Could not convert point cloud from \"lvr::MeshBuffer\" to \"mesh_msgs::TriangleMeshStamped\"!");
 			return false;
 		}
+
+		// setting header frame and stamp
+		mesh_msg.header.frame_id = cloud.header.frame_id;
+		mesh_msg.header.stamp = cloud.header.stamp;
+
 		return true;
 	}
 
@@ -331,7 +347,7 @@ namespace lvr_ros{
 		mesh_buffer = mesh.meshBuffer();
 	
 		ROS_INFO_STREAM("Reconstruction finished!");
-
+		return true;
 	}
 
 	float* Reconstruction::getStatsCoeffs(std::string filename)const
@@ -362,14 +378,9 @@ namespace lvr_ros{
 
 	int main(int argc, char** args)
 	{
-		ros::init(argc, args, "lvr_ros_reconstruction");
-
-		ros::Rate loop_rate(10);
-		while(ros::ok())
-		{
-			ros::spinOnce();
-			loop_rate.sleep();
-		}
+		ros::init(argc, args, "reconstruction");
+		lvr_ros::Reconstruction reconstruction;
+		ros::spin();
 
 		return 0;
 	}

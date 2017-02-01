@@ -36,7 +36,7 @@ namespace lvr_ros
 
   bool fromMeshBufferToTriangleMesh(const lvr::MeshBufferPtr& buffer, mesh_msgs::TriangleMesh& mesh)
   {
-    fromMeshBufferToTriangleMesh(*buffer, mesh);
+    return fromMeshBufferToTriangleMesh(*buffer, mesh);
   }
 
   bool fromMeshBufferToTriangleMesh(lvr::MeshBuffer& buffer, mesh_msgs::TriangleMesh& mesh)
@@ -47,6 +47,11 @@ namespace lvr_ros
     lvr::coord3fArr verticesArray = buffer.getIndexedVertexArray(numVertices);
     lvr::coord3fArr normalsArray = buffer.getIndexedVertexNormalArray(numNormals);
     lvr::uintArr facesArray = buffer.getFaceArray(numFaces);
+
+    ROS_DEBUG_STREAM("number vertices: " << numVertices);
+    ROS_DEBUG_STREAM("number triangles: " << numFaces);
+    ROS_DEBUG_STREAM("number normals: " << numNormals);
+
 
     mesh.vertices.resize(numVertices);
     mesh.vertex_normals.resize(numNormals);
@@ -355,27 +360,62 @@ namespace lvr_ros
 
   bool fromPointCloud2ToPointBuffer(const sensor_msgs::PointCloud2& cloud, lvr::PointBuffer& buffer)
   {
+    ROS_DEBUG_STREAM("convert from PointCloud2 to PointBuffer.");
 
-    const size_t size = cloud.height * cloud.width;
+    size_t size = cloud.height * cloud.width;
 
     typedef sensor_msgs::PointCloud2ConstIterator<float> CloudIterFloat;
     typedef sensor_msgs::PointCloud2ConstIterator<uint8_t> CloudIterUInt8;
 
 
+    std::list<int> filter_nan;
+
+
     // copy point data
+    CloudIterFloat iter_x_filter(cloud, "x");
+    CloudIterFloat iter_y_filter(cloud, "y");
+    CloudIterFloat iter_z_filter(cloud, "z");
+
+    // size without NaN values
+    size = 0;
+    for(int i=0; iter_x_filter != iter_x_filter.end();
+      ++iter_x_filter, ++iter_y_filter, ++iter_z_filter, i++) {
+      if(!std::isnan(*iter_x_filter) && !std::isnan(*iter_y_filter) && !std::isnan(*iter_z_filter))
+        size++;
+      else{
+        filter_nan.push_back(i);
+      }
+    }
+
+    filter_nan.sort();
+
+    float* pointData = new float[size * 3];
+
+        // copy point data
     CloudIterFloat iter_x(cloud, "x");
     CloudIterFloat iter_y(cloud, "y");
     CloudIterFloat iter_z(cloud, "z");
-    float* pointData = new float[size * 3];
+
+
+    std::list<int> tmp_filter = filter_nan;
+    int index = 0;
     for(int i=0; 
         iter_x != iter_x.end();
         ++iter_x, ++iter_y, ++iter_z,
-        i+=3) {
+        index++) {
+      // skip NaN point values
+      if(!tmp_filter.empty() && index == tmp_filter.front()){
+        tmp_filter.pop_front();
+        continue;
+      }
 
       // copy point 
       pointData[i]   = *iter_x;
       pointData[i+1] = *iter_y;
-      pointData[i+2] = *iter_z;
+      pointData[i+2] = *iter_z; 
+
+      i+=3; 
+
     }
     buffer.setPointArray(lvr::floatArr(pointData), size);
 
@@ -387,35 +427,57 @@ namespace lvr_ros
         && hasCloudChannel(cloud, "normal_z");
 
     if(normalsAvailable){
+      ROS_DEBUG_STREAM("include normals in conversion.");
       CloudIterFloat iter_n_x(cloud, "normal_x");
       CloudIterFloat iter_n_y(cloud, "normal_y");
       CloudIterFloat iter_n_z(cloud, "normal_z");
       float* normalsData = new float[size * 3];
+      tmp_filter = filter_nan;
+      int index = 0;
       for(int i=0; 
           iter_n_x != iter_n_x.end();
           ++iter_n_x, ++iter_n_y, ++iter_n_z,
-          i+=3) {
+          index++) {
+
+        // skip NaN point values
+        if(!tmp_filter.empty() && index == tmp_filter.front()){
+          tmp_filter.pop_front();
+          continue;
+        }
 
         // copy normal 
         normalsData[i]   = *iter_n_x;
         normalsData[i+1] = *iter_n_y;
         normalsData[i+2] = *iter_n_z;
+
+        i+=3;
       }
       buffer.setPointNormalArray(lvr::floatArr(normalsData), size);
     }
 
 
     // copy color data if available    
-    if(hasCloudChannel(cloud, "rgb") != -1){
+    if(hasCloudChannel(cloud, "rgb")){
+      ROS_DEBUG_STREAM("include rgb in conversion.");
       CloudIterUInt8 iter_rgb(cloud, "rgb");
       uint8_t* colorData = new uint8_t[size*3];
+      tmp_filter = filter_nan;
+      int index = 0;
       for(int i=0; iter_rgb != iter_rgb.end();
-          ++iter_rgb, i+=3) {
+          ++iter_rgb, index++) {
+
+        // skip NaN point values
+        if(!tmp_filter.empty() && index == tmp_filter.front()){
+          tmp_filter.pop_front();
+          continue;
+        }
 
         // copy color rgb
         colorData[i]   = iter_rgb[0];
         colorData[i+1] = iter_rgb[1];
         colorData[i+2] = iter_rgb[2];
+
+        i+=3;
       }
       buffer.setPointColorArray(lvr::ucharArr(colorData), size);
     }
@@ -423,17 +485,27 @@ namespace lvr_ros
 
     // copy intensity if available
     if(hasCloudChannel(cloud, "intensities")){
+      ROS_DEBUG_STREAM("include intensities in conversion.");
       CloudIterFloat iter_int(cloud, "intensities");
       float* intensityData = new float[size];
-
+      tmp_filter = filter_nan;
+      int index = 0;
       for(int i=0; iter_int != iter_int.end();
-          ++iter_int, i++) {
+          ++iter_int, index++) {
 
-        // copy color rgb
+        // skip NaN point values
+        if(!tmp_filter.empty() && index == tmp_filter.front()){
+          tmp_filter.pop_front();
+          continue;
+        }
+
+        // copy intensity
         intensityData[i]   = *iter_int;
+        i++;
       }
       buffer.setPointIntensityArray(lvr::floatArr(intensityData), size);
     }
+    ROS_DEBUG_STREAM("conversion finished.");
     return true;
   }
 } // end namespace

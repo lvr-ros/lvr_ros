@@ -49,9 +49,17 @@ class Reconstruction{
   private:
 
   	void pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud);
-	bool createMesh(const sensor_msgs::PointCloud2& cloud, mesh_msgs::TriangleMeshStamped& mesh);
-	bool createMesh(lvr::PointBufferPtr& point_buffer, lvr::MeshBufferPtr& mesh_buffer);
-	float* getStatsCoeffs(std::string filename)const;
+    bool createMesh(const sensor_msgs::PointCloud2& cloud, mesh_msgs::TriangleMeshStamped& mesh);
+    bool createMesh(lvr::PointBufferPtr& point_buffer, lvr::MeshBufferPtr& mesh_buffer);
+    float* getStatsCoeffs(std::string filename)const;
+
+    void reconfigureCallback(lvr_ros::ReconstructionConfig& config, uint32_t level);
+
+    typedef dynamic_reconfigure::Server<lvr_ros::ReconstructionConfig> DynReconfigureServer;
+    typedef boost::shared_ptr<DynReconfigureServer> DynReconfigureServerPtr;
+
+    DynReconfigureServerPtr reconfigure_server_ptr;
+    DynReconfigureServer::CallbackType callback_type;
 
   	ros::NodeHandle node_handle;
   	ros::Publisher mesh_publisher;
